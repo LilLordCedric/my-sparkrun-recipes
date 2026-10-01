@@ -1,0 +1,40 @@
+recipe_version: '2'
+name: deepseek-v4-flash-gguf-iq2m-16slots
+model: unsloth/DeepSeek-V4-Flash-GGUF:UD-IQ2_M
+runtime: llama-cpp
+container: scitrera/dgx-spark-llama-cpp:latest
+metadata:
+  description: DeepSeek-V4-Flash GGUF IQ2_M with 16 parallel slots and a shared 192K KV pool
+  model_params: 284B
+  model_vram: 90.9
+  kv_dtype: q8_0
+  num_layers: 43
+  num_kv_heads: 1
+  head_dim: 512
+defaults:
+  port: 7010
+  host: 0.0.0.0
+  max_model_len: 196608
+  parallel_slots: 16
+  tensor_parallel: 1
+  n_gpu_layers: 99
+  served_model_name: deepseek-v4-flash
+  kv_cache_dtype: q8_0
+environment:
+  LD_LIBRARY_PATH: /usr/local/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64
+command: |
+  llama-server \
+      -hf {model} \
+      --alias {served_model_name} \
+      --host {host} \
+      --port {port} \
+      --n-gpu-layers {n_gpu_layers} \
+      --ctx-size {max_model_len} \
+      --parallel {parallel_slots} \
+      --kv-unified \
+      --cache-type-k {kv_cache_dtype} \
+      --cache-type-v {kv_cache_dtype} \
+      --flash-attn on \
+      --jinja \
+      --no-webui \
+      --load-mode mmap

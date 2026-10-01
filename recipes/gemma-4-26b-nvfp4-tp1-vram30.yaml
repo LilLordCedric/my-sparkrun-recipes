@@ -1,0 +1,33 @@
+env: {}
+build_args:
+  - '--tf5'
+model: RedHatAI/gemma-4-26B-A4B-it-NVFP4
+description: vLLM serving Gemma4-26B-A4B (NVFP4, tp1, 30% util side-deploy next to training)
+solo_only: false
+name: Gemma4-26B-A4B
+container: vllm-node-tf5
+defaults:
+  tensor_parallel: 1
+  host: 0.0.0.0
+  max_num_batched_tokens: 8192
+  gpu_memory_utilization: 0.6
+  port: 7010
+  max_model_len: 262144
+mods:
+  - mods/fix-gemma4-tool-parser
+recipe_version: '1'
+command: |
+  vllm serve RedHatAI/gemma-4-26B-A4B-it-NVFP4  \
+    --max-model-len {max_model_len} \
+    --gpu-memory-utilization {gpu_memory_utilization} \
+    --port {port} \
+    --host {host} \
+    --load-format fastsafetensors \
+    --enable-prefix-caching \
+    --enable-auto-tool-choice \
+    --tool-call-parser gemma4 \
+    --reasoning-parser gemma4 \
+    --kv-cache-dtype fp8 \
+    --max-num-batched-tokens {max_num_batched_tokens} \
+    -tp {tensor_parallel}
+cluster_only: false
