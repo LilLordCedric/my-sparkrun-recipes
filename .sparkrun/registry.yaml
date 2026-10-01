@@ -1,0 +1,6 @@
+# Simple registry manifest for sparkrun – all .yaml files in this repo are recipes
+registries:
+  - name: recipes
+    path: .
+    include:
+      - "*.yaml"
